@@ -1,0 +1,239 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "Documentation for Product API",
+    "title": "of Product API",
+    "version": "1.0.0"
+  },
+  "basePath": "/",
+  "paths": {
+    "/products": {
+      "get": {
+        "description": "Return a list of products from the database",
+        "tags": [
+          "products"
+        ],
+        "operationId": "listProducts",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/productsResponse"
+          }
+        }
+      },
+      "put": {
+        "description": "Update a products details",
+        "tags": [
+          "products"
+        ],
+        "operationId": "updateProduct",
+        "parameters": [
+          {
+            "description": "Product data structure to Update or Create.\nNote: the id field is ignored by update and create operations",
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ID",
+            "description": "The id of the product for which the operation relates",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/noContentResponse"
+          },
+          "404": {
+            "$ref": "#/responses/errorResponse"
+          },
+          "422": {
+            "$ref": "#/responses/errorValidation"
+          }
+        }
+      },
+      "post": {
+        "description": "Create a new product",
+        "tags": [
+          "products"
+        ],
+        "operationId": "createProduct",
+        "parameters": [
+          {
+            "description": "Product data structure to Update or Create.\nNote: the id field is ignored by update and create operations",
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/productResponse"
+          },
+          "422": {
+            "$ref": "#/responses/errorValidation"
+          },
+          "501": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "description": "Return a list of products from the database",
+        "tags": [
+          "products"
+        ],
+        "operationId": "listSingle",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/productResponse"
+          },
+          "404": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      },
+      "delete": {
+        "description": "Update a products details",
+        "tags": [
+          "products"
+        ],
+        "operationId": "deleteProduct",
+        "responses": {
+          "201": {
+            "$ref": "#/responses/noContentResponse"
+          },
+          "404": {
+            "$ref": "#/responses/errorResponse"
+          },
+          "501": {
+            "$ref": "#/responses/errorResponse"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "GenericError": {
+      "description": "GenericError is a generic error message returned by a server",
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        }
+      },
+      "x-go-package": "github.tesla.com/chrzhang/go-microservices-restful/handlers"
+    },
+    "Product": {
+      "description": "Product defines the structure for an API product",
+      "type": "object",
+      "required": [
+        "name",
+        "price",
+        "sku"
+      ],
+      "properties": {
+        "description": {
+          "description": "the description for this poduct",
+          "type": "string",
+          "maxLength": 10000,
+          "x-go-name": "Description"
+        },
+        "id": {
+          "description": "the id for the product",
+          "type": "integer",
+          "format": "int64",
+          "minimum": 1,
+          "x-go-name": "ID"
+        },
+        "name": {
+          "description": "the name for this poduct",
+          "type": "string",
+          "maxLength": 255,
+          "x-go-name": "Name"
+        },
+        "price": {
+          "description": "the price for the product",
+          "type": "number",
+          "format": "float",
+          "minimum": 0.01,
+          "x-go-name": "Price"
+        },
+        "sku": {
+          "description": "the SKU for the product",
+          "type": "string",
+          "pattern": "[a-z]+-[a-z]+-[a-z]+",
+          "x-go-name": "SKU"
+        }
+      },
+      "x-go-package": "github.tesla.com/chrzhang/go-microservices-restful/data"
+    },
+    "ValidationError": {
+      "description": "ValidationError is a collection of validation error messages",
+      "type": "object",
+      "properties": {
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Messages"
+        }
+      },
+      "x-go-package": "github.tesla.com/chrzhang/go-microservices-restful/handlers"
+    }
+  },
+  "responses": {
+    "errorResponse": {
+      "description": "Generic error message returned as a string",
+      "schema": {
+        "$ref": "#/definitions/GenericError"
+      }
+    },
+    "errorValidation": {
+      "description": "Validation errors defined as an array of strings",
+      "schema": {
+        "$ref": "#/definitions/ValidationError"
+      }
+    },
+    "noContentResponse": {
+      "description": "No content is returned by this API endpoint"
+    },
+    "productResponse": {
+      "description": "Data structure representing a single product",
+      "schema": {
+        "$ref": "#/definitions/Product"
+      }
+    },
+    "productsResponse": {
+      "description": "A list of products",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/Product"
+        }
+      }
+    }
+  }
+}
