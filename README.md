@@ -1,25 +1,48 @@
 # go-microservices-restful
-If using for the first time, be sure to run 
+
+Multi-part requests is somewhat deprecated. It's technically valid, but most people are not using plain HTTP to POST data. It's not RESTful either. For that reason, it's not that relevant to include multi-part support here.
+
+Moving on to gRPC services! JSON and REST are not maximally optimized. gRPC will use binary-based message protocol using protobufs. In a proto file, services, methods for services, and messages (input/output) for methods are defined.
+
+https://grpc.io/docs/languages/go/basics/#client-side-streaming-rpc
+
+An interface (i.e. `CurrencyServer`) is generated to create a gRPC server using the method `GetRate()`. A struct needs to implement this interface. To create the server, we need the `RegisterCurrencyServer`, which maps the implementation of the interface (how you want to handle getRate()) to gRPC server. In JSON terms, this is kinda like `CurrencyServer` is the handlers, and gRPC is HTTP server - matching routes to a server. The struct `Currency` that implements `CurrencyServer` is defined in `currency.go` under server.
+
+`grpccurl` can be used for testing.
 
 ```
-npm install
-```
-and then 
-
-```
-yarn start
+$ grpcurl --plaintext localhost:9092 list
+Currency
+grpc.reflection.v1alpha.ServerReflection
 ```
 
-Docs on React here: https://github.com/facebook/create-react-app
-
-The react app is running on localhost:3000, but the products-api is on localhost:9090/products.
-
-When running the react app at first, the below error is presented:
-
 ```
-"Access to XMLHttpRequest at 'http://localhost:9090/products' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+$ grpcurl --plaintext localhost:9092 describe Currency.GetRate
+Currency.GetRate is a method:
+rpc GetRate ( .RateRequest ) returns ( .RateResponse );
 ```
 
-CORS blocks this, since it blocks requests from other origins besides the one its loaded. ReactJS is running on 3000, so origin is localhost:3000. A different port (i.e. 9090) is a different origin. CORS protects the browser gettiing requests from other origins (forwarding cookies causes security compromises). To solve this, CORS in gorilla/mux is used (see main.go).
+```
+$ grpcurl --plaintext localhost:9092 describe .RateRequest
+RateRequest is a message:
+message RateRequest {
+  string Base = 1;
+  string Destination = 2;
+}
+```
 
-Handling and serving files is a bit complex... refer to https://www.youtube.com/watch?v=ctmhYJpGsgU&list=PLmD8u-IFdreyh6EUfevBcbiuCKzFk0EW_&index=10
+```
+$ grpcurl --plaintext -d '{"Base":"GBP", "Destination":"USD"}' localhost:9092 Currency.GetRate
+{
+  "rate": 0.5
+}
+```
+
+
+Now that a gRPC service is created (i.e. `CurrencyService`), need to look at how CurrencyService can be integrated with API service or how there can be client-side calls from go into CurrencyService.
+
+First is adding enumerations for allowed currencies. Also `Base/Destination` are changed from string type to this enumeration type.
+
+We want to be able to call the service (the one that defines `Currency`) from `product-api`; product API has upstream dependencies, such as conversion of currency. So we need to construct a client that calls the `Currency` service.
+
+To do this, we just use the client creation method generated from the proto file - `CurrencyClient`. We create a `currencyClient` using the `NewCurrencyClient` method. Protobufs are good since clients are interfaces and testing would be easy!
