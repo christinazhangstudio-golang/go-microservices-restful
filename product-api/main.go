@@ -14,6 +14,8 @@ import (
 	"github.tesla.com/chrzhang/go-microservices-restful/product-api/data"
 
 	gohandlers "github.com/gorilla/handlers"
+
+	protos "github.tesla.com/chrzhang/go-microservices-restful/currency/protos"
 )
 
 func main() {
@@ -22,6 +24,16 @@ func main() {
 	v := data.NewValidation()
 
 	ph := handlers.NewProducts(l, v)
+
+	conn, err := grpc.Dial("localhost:9092")
+	if err != nil {
+		panic(err)
+	}
+
+	defer conn.Close()
+
+	//create client, we need to connect to particular service, so the gRPC dial is defined above with an address
+	protos.NewCurrencyClient(conn)
 
 	sm := mux.NewRouter()
 
