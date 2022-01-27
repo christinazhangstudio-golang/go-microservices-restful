@@ -14,5 +14,9 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/stretchr/testify v1.7.0
+	github.tesla.com/chrzhang/go-microservices-restful/currency v0.0.0-00010101000000-000000000000
+	google.golang.org/grpc v1.44.0
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )
+
+replace github.tesla.com/chrzhang/go-microservices-restful/currency => ../currency

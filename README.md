@@ -46,3 +46,7 @@ First is adding enumerations for allowed currencies. Also `Base/Destination` are
 We want to be able to call the service (the one that defines `Currency`) from `product-api`; product API has upstream dependencies, such as conversion of currency. So we need to construct a client that calls the `Currency` service.
 
 To do this, we just use the client creation method generated from the proto file - `CurrencyClient`. We create a `currencyClient` using the `NewCurrencyClient` method. Protobufs are good since clients are interfaces and testing would be easy!
+
+In `main.go` in `product-api`, we create an instance of this client.
+
+Recap: Call `getRate()` method from `get.go`, which is from the `CurrencyClient` which has been auto-gen'ed from proto file. We constructed a new `CurrencyClient` using the address of the service and created a gRPC connection, which we then use in `get.go` (`ListSingle`)

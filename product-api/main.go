@@ -16,6 +16,7 @@ import (
 	gohandlers "github.com/gorilla/handlers"
 
 	protos "github.tesla.com/chrzhang/go-microservices-restful/currency/protos"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -23,17 +24,19 @@ func main() {
 	l := log.New(os.Stdout, "product-api", log.LstdFlags)
 	v := data.NewValidation()
 
-	ph := handlers.NewProducts(l, v)
 
-	conn, err := grpc.Dial("localhost:9092")
+	conn, err := grpc.Dial("localhost:9092", grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}
 
 	defer conn.Close()
 
-	//create client, we need to connect to particular service, so the gRPC dial is defined above with an address
-	protos.NewCurrencyClient(conn)
+	// create client, we need to connect to particular service, so the gRPC dial is defined above with an address
+	cc := protos.NewCurrencyClient(conn)
+
+	// once we have currency client, we want to pass it to handlers
+	ph := handlers.NewProducts(l, v, cc)
 
 	sm := mux.NewRouter()
 

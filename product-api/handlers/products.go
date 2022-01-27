@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.tesla.com/chrzhang/go-microservices-restful/product-api/data"
+	protos "github.tesla.com/chrzhang/go-microservices-restful/currency/protos"
 )
 
 // KeyProduct is a key used for the Product object in the context
@@ -17,11 +18,12 @@ type KeyProduct struct{}
 type Products struct {
 	l *log.Logger
 	v *data.Validation
+	cc protos.CurrencyClient
 }
 
 // NewProducts returns a new products handler with the given logger
-func NewProducts(l *log.Logger, v *data.Validation) *Products {
-	return &Products{l, v}
+func NewProducts(l *log.Logger, v *data.Validation, cc protos.CurrencyClient) *Products {
+	return &Products{l, v, cc}
 }
 
 // ErrInvalidProductPath is an error message when the product path is not valid
